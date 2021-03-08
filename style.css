@@ -1,0 +1,15 @@
+#heading {
+    font-size: 33px;
+  }
+  
+  #result {
+    display: none;
+  }
+  
+  a {
+    color: white;
+  }
+  
+  dt {
+    font-weight: bold;
+  }

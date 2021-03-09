@@ -1,48 +1,15 @@
-const width = 700;
-const height = 400;
-const left = (screen.width / 2) - (width / 2);
-const top = (screen.height / 2) - (height / 2);
-const $loginButton = $('#btn-login');
-const $loginSection = $('#login-section');
-const $result = $('#result');
-const templateSource = document.getElementById('result-template').innerHTML
-const resultsTemplate = Handlebars.compile(templateSource);
-
-const napsterAPI = 'https://api.napster.com';
-const APIKEY = 'ZTk2YjY4MjMtMDAzYy00MTg4LWE2MjYtZDIzNjJmMmM0YTdm';
-const oauthURL = `${napsterAPI}/oauth/authorize?client_id=${APIKEY}&response_type=code`;
-
-const REDIRECT_URI = 'https://developer.napster.com/jsfiddle_proxy';
-
-function fetchUserData (accessToken) {
-	return $.ajax({
-  	url: `${napsterAPI}/v2.1/me`,
-    headers: {
-      'Authorization': 'Bearer ' + accessToken
-    }
-  });	
-}
+var userToken;
 
 function login() {
-	window.addEventListener('message',(event) => {
-    var hash = JSON.parse(event.data);
-    if (hash.type === 'access_token') {
-      fetchUserData(hash.access_token)
-      	.then((data) => {
-        	$loginSection.hide();
-          $result.html(resultsTemplate(data.me));
-          $result.show();
-        });
-    }
-  }, false);
- 
-	window.open(
-  	`${oauthURL}&redirect_uri=${REDIRECT_URI}`,
-  	'Napster',
-    `menubar=no,location=no,resizable=no,scrollbars=no,status=no,width=${width},height=${height},top=${top}, left=${left}`
-  );
-}
-
-$loginButton.click(() => {
- login();
-})
+    DZ.login(function (response) {
+        if (response.authResponse) {
+            console.log('Welcome!  Fetching your information.... ');
+            DZ.api('/user/me', function (response) {
+                console.log('Good to see you, ' + response.name + '.');
+            });
+            userToken = response.authResponse.accessToken;
+        } else {
+            console.log('User cancelled login or did not fully authorize.');
+        }
+    }, { perms: 'email, manage_library' });
+};
